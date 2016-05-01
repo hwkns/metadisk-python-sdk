@@ -62,7 +62,8 @@ class MetadiskClient:
         email_and_password = self.email + ':' + self.password
         request_kwargs['headers'].update(
             {
-                'Authorization': b'Basic ' + b64encode(email_and_password.encode('ascii')),
+                'Authorization': b'Basic ' + b64encode(
+                    email_and_password.encode('ascii')),
             }
         )
 
@@ -79,8 +80,10 @@ class MetadiskClient:
             request_kwargs['json']['__nonce'] = int(time.time())
             data = json.dumps(request_kwargs['json'])
 
-        contract = '\n'.join((method, request_kwargs['path'], data)).encode('utf-8')
-        signature_bytes = self.private_key.sign(contract, sigencode=sigencode_der, hashfunc=sha256)
+        contract = '\n'.join((method, request_kwargs['path'], data)).\
+            encode('utf-8')
+        signature_bytes = self.private_key.sign(
+            contract, sigencode=sigencode_der, hashfunc=sha256)
         signature = b2a_hex(signature_bytes).decode('ascii')
 
         request_kwargs['headers'].update(
@@ -215,7 +218,8 @@ class MetadiskClient:
         pull_token = self.create_token(bucket_id, operation='PULL')
         response = self.request(
             method='GET',
-            path='/buckets/{id}/files/{hash}'.format(id=bucket_id, hash=file_hash),
+            path='/buckets/{id}/files/{hash}'.format(
+                id=bucket_id, hash=file_hash),
             headers={
                 'x-token': pull_token['token'],
             }
@@ -224,11 +228,13 @@ class MetadiskClient:
 
     def download_file(self, bucket_id, file_hash):
 
-        pointers = self.get_file_pointers(bucket_id=bucket_id, file_hash=file_hash)
+        pointers = self.get_file_pointers(
+            bucket_id=bucket_id, file_hash=file_hash)
 
         file_contents = BytesIO()
         for pointer in pointers:
-            ws = FileRetrieverWebSocketClient(pointer=pointer, file_contents=file_contents)
+            ws = FileRetrieverWebSocketClient(
+                pointer=pointer, file_contents=file_contents)
             ws.connect()
             ws.run_forever()
 
@@ -252,7 +258,8 @@ class MetadiskClient:
         )
         assert(response.status_code == 200)
 
-    def create_bucket(self, bucket_name, storage_limit=None, transfer_limit=None):
+    def create_bucket(self, bucket_name, storage_limit=None,
+                      transfer_limit=None):
 
         data = {
             'name': bucket_name,
